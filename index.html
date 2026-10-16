@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikGlow | TikTok Downloader Aesthetic</title>
+    <title>download by Tip | TikTok Downloader Aesthetic</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -122,7 +122,6 @@
             transform: none;
         }
 
-        /* Bagian Hasil & Pratinjau Video */
         .result-box {
             margin-top: 2rem;
             padding-top: 2rem;
@@ -183,15 +182,15 @@
 <body>
 
     <div class="container">
-        <h1>TikGlow</h1>
-        <p class="subtitle">Download video TikTok tanpa watermark dengan kualitas HD</p>
+        <h1>download by Tip</h1>
+        <p class="subtitle">Download video TikTok tanpa watermark dengan cepat dan mudah</p>
         
         <div class="input-group">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
             <button id="btnAction" onclick="processDownload()">Mulai Unduh</button>
         </div>
 
-        <!-- Box Hasil -->
+        <!-- Box Hasil Potongan API -->
         <div class="result-box" id="resultBox">
             <div class="video-info">
                 <img id="videoThumb" src="" alt="Thumbnail">
@@ -204,7 +203,7 @@
         </div>
 
         <footer>
-            &copy; 2026 TikGlow. Dibuat dengan penuh gaya.
+            &copy; 2026 download by Tip. Dibuat dengan penuh gaya.
         </footer>
     </div>
 
@@ -221,29 +220,23 @@
                 return;
             }
 
-            // Ganti teks tombol menjadi loading
             btn.disabled = true;
             btn.innerText = "Memproses...";
             resultBox.style.display = "none";
 
             try {
-                // Menggunakan API publik gratis untuk fetch data TikTok
                 const apiUrl = `https://tikwm.com{encodeURIComponent(inputUrl)}`;
                 const response = await fetch(apiUrl);
                 const resData = await response.json();
 
                 if (resData.code === 0 && resData.data) {
                     const data = resData.data;
-                    
-                    // Simpan URL video tanpa watermark ke variabel global
                     cachedDownloadUrl = data.play; 
 
-                    // Tampilkan info video ke antarmuka pengguna (UI)
                     document.getElementById('videoThumb').src = data.cover;
                     document.getElementById('videoTitle').innerText = data.title || "Video TikTok";
                     document.getElementById('videoAuthor').innerText = `@${data.author.unique_id || "user"}`;
                     
-                    // Munculkan kotak hasil dengan efek transisi
                     resultBox.style.display = 'block';
                 } else {
                     alert('Gagal mengambil data video. Pastikan link video valid dan publik!');
@@ -252,7 +245,6 @@
                 console.error(error);
                 alert('Terjadi kesalahan koneksi server API. Silakan coba lagi nanti.');
             } finally {
-                // Kembalikan tombol ke kondisi semula
                 btn.disabled = false;
                 btn.innerText = "Mulai Unduh";
             }
@@ -260,7 +252,6 @@
 
         function triggerDownload() {
             if (cachedDownloadUrl) {
-                // Buka tab baru untuk mengunduh video asli tanpa watermark secara langsung
                 window.open(cachedDownloadUrl, '_blank');
             } else {
                 alert('Tautan unduhan tidak ditemukan, silakan muat ulang halaman.');
