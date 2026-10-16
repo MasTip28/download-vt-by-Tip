@@ -96,12 +96,14 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        button {
+        /* Mengubah tombol menjadi komponen tautan yang aman bagi browser HP */
+        .btn-download {
+            display: block;
             width: 100%;
             padding: 16px;
             background: linear-gradient(45deg, #7928ca, #ff007f);
             color: white;
-            border: none;
+            text-decoration: none;
             border-radius: 14px;
             font-size: 1rem;
             font-weight: 600;
@@ -110,7 +112,7 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
         }
 
-        button:hover {
+        .btn-download:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
         }
@@ -130,7 +132,7 @@
         
         <div class="input-group">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
-            <button id="btnAction" onclick="processDownload()">Langsung Unduh</button>
+            <a href="#" id="btnAction" class="btn-download" onclick="processDownload(event)">Langsung Unduh</a>
         </div>
 
         <footer>
@@ -139,21 +141,25 @@
     </div>
 
     <script>
-        function processDownload() {
+        function processDownload(event) {
             const inputUrl = document.getElementById('tiktokUrl').value.trim();
 
             if (!inputUrl) {
+                event.preventDefault();
                 alert('Tolong masukkan link TikTok terlebih dahulu!');
                 return;
             }
 
-            // Memotong query string tidak penting di belakang link tiktok agar bersih
+            // Bersihkan parameter tautan agar tidak merusak sistem pencarian
             const cleanUrl = inputUrl.split('?')[0];
             
-            // Pengalihan ke gerbang eksternal yang aman dan dijamin langsung memproses video asli
-            const finalLink = "https://ssstik.io" + encodeURIComponent(cleanUrl);
+            // Generate link tujuan secara langsung aman tanpa pop-up blocker
+            const finalDestination = "https://ssstik.io" + encodeURIComponent(cleanUrl);
             
-            window.open(finalLink, '_blank');
+            // Ubah link tujuan tombol lalu eksekusi pengalihan halaman secara natural
+            const linkElement = document.getElementById('btnAction');
+            linkElement.href = finalDestination;
+            linkElement.target = "_blank";
         }
     </script>
 </body>
