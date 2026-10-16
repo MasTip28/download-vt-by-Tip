@@ -72,6 +72,7 @@
             margin-bottom: 2rem;
         }
 
+        /* Form Menggunakan Tag Form Resmi Agar Tombol HP Pasti Bisa Diklik */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -96,7 +97,7 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        button {
+        .btn-submit {
             width: 100%;
             padding: 16px;
             background: linear-gradient(45deg, #7928ca, #ff007f);
@@ -110,9 +111,58 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
         }
 
-        button:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
+        }
+
+        /* Bagian Kotak Hasil seperti di Snaptik */
+        .result-box {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .video-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .video-author {
+            font-size: 0.85rem;
+            color: #00f2fe;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00b4d8, #0077b6);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+            display: block;
+            width: 100%;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
+            transform: translateY(-2px);
         }
 
         footer {
@@ -128,9 +178,19 @@
         <h1>download by Tip</h1>
         <p class="subtitle">Download video TikTok tanpa watermark dengan cepat dan mudah</p>
         
-        <div class="input-group">
+        <!-- Form resmi yang mencegah bug tombol tidak bisa ditekan di peramban HP -->
+        <form class="input-group" onsubmit="prosesDataTiktok(event)">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
-            <button id="btnAction" onclick="eksekusiUnduh()">Mulai Unduh</button>
+            <button type="submit" id="btnAction" class="btn-submit">Mulai Unduh</button>
+        </form>
+
+        <!-- Tempat memunculkan data & tombol unduh persis seperti Snaptik -->
+        <div class="result-box" id="resultBox">
+            <div class="video-card">
+                <p class="video-title" id="resTitle">Memproses Video...</p>
+                <p class="video-author" id="resAuthor">@user</p>
+                <a href="#" id="finalDownloadLink" class="download-btn" rel="noreferrer">Download Tanpa Watermark</a>
+            </div>
         </div>
 
         <footer>
@@ -139,19 +199,60 @@
     </div>
 
     <script>
-        function eksekusiUnduh() {
-            const tautanInput = document.getElementById('tiktokUrl').value.trim();
+        async function prosesDataTiktok(event) {
+            // Mencegah browser melakukan refresh halaman otomatis
+            event.preventDefault();
 
-            if (!tautanInput) {
-                alert('Tolong masukkan link TikTok terlebih dahulu!');
-                return;
+            const inputField = document.getElementById('tiktokUrl');
+            const actionBtn = document.getElementById('btnAction');
+            const resultArea = document.getElementById('resultBox');
+            let urlTarget = inputField.value.trim();
+
+            if (!urlTarget) return;
+
+            // Mengubah status tombol menjadi loading
+            actionBtn.disabled = true;
+            actionBtn.innerText = "Mengambil data...";
+            resultArea.style.display = "none";
+
+            try {
+                // Mengirim permintaan ke endpoint API pengurai video Tiktok yang tangguh
+                const response = await fetch("https://eu.org" + encodeURIComponent(urlTarget));
+                const jsonResult = await response.json();
+
+                if (jsonResult && jsonResult.video && jsonResult.video.noWatermark) {
+                    // Isi judul video dan username pembuatnya
+                    document.getElementById('resTitle').innerText = jsonResult.title || "Video Berhasil Diambil!";
+                    document.getElementById('resAuthor').innerText = jsonResult.author ? `@${jsonResult.author.uniqueId}` : "@kreator";
+                    
+                    // Masukkan link download mp4 tanpa watermark langsung ke tombol
+                    const downloadAnchor = document.getElementById('finalDownloadLink');
+                    downloadAnchor.href = jsonResult.video.noWatermark;
+
+                    // Tampilkan kotak unduhan internal ala Snaptik ke layar web Anda sendiri
+                    resultArea.style.display = "block";
+                } else {
+                    alert("Tautan salah atau video privat. Coba gunakan tautan video TikTok lainnya!");
+                }
+            } catch (err) {
+                // Menggunakan server cadangan terkuat jika jalur utama sibuk
+                try {
+                    const altRes = await fetch("https://tikwm.com" + encodeURIComponent(urlTarget));
+                    const altJson = await altRes.json();
+                    if(altJson && altJson.data) {
+                        document.getElementById('resTitle').innerText = altJson.data.title || "Video Berhasil Diambil!";
+                        document.getElementById('resAuthor').innerText = `@${altJson.data.author.unique_id}`;
+                        document.getElementById('finalDownloadLink').href = altJson.data.play;
+                        resultArea.style.display = "block";
+                        return;
+                    }
+                } catch(e) {}
+                alert("Jaringan sibuk, silakan klik tombol 'Mulai Unduh' sekali lagi.");
+            } finally {
+                // Mengembalikan tombol agar siap digunakan kembali
+                actionBtn.disabled = false;
+                actionBtn.innerText = "Mulai Unduh";
             }
-
-            // Sistem gerbang bypass yang otomatis mendukung tautan pendek seluler (://tiktok.com)
-            const tautanBersih = tautanInput.split('?')[0];
-            
-            // Dialihkan langsung ke sistem pemroses eksternal terkuat tanpa pop-up blocker di peramban yang sama
-            window.location.href = "https://ssstik.io" + encodeURIComponent(tautanBersih);
         }
     </script>
 </body>
