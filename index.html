@@ -96,14 +96,12 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        /* Mengubah tombol menjadi komponen tautan yang aman bagi browser HP */
-        .btn-download {
-            display: block;
+        button {
             width: 100%;
             padding: 16px;
             background: linear-gradient(45deg, #7928ca, #ff007f);
             color: white;
-            text-decoration: none;
+            border: none;
             border-radius: 14px;
             font-size: 1rem;
             font-weight: 600;
@@ -112,7 +110,7 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
         }
 
-        .btn-download:hover {
+        button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
         }
@@ -132,7 +130,7 @@
         
         <div class="input-group">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
-            <a href="#" id="btnAction" class="btn-download" onclick="processDownload(event)">Langsung Unduh</a>
+            <button id="btnAction" onclick="processDownload()">Langsung Unduh</button>
         </div>
 
         <footer>
@@ -141,25 +139,22 @@
     </div>
 
     <script>
-        function processDownload(event) {
+        function processDownload() {
             const inputUrl = document.getElementById('tiktokUrl').value.trim();
 
             if (!inputUrl) {
-                event.preventDefault();
                 alert('Tolong masukkan link TikTok terlebih dahulu!');
                 return;
             }
 
-            // Bersihkan parameter tautan agar tidak merusak sistem pencarian
+            // Bersihkan parameter tambahan dari tautan TikTok
             const cleanUrl = inputUrl.split('?')[0];
             
-            // Generate link tujuan secara langsung aman tanpa pop-up blocker
+            // Format tujuan langsung menggunakan gerbang layanan ekstraksi video gratis
             const finalDestination = "https://ssstik.io" + encodeURIComponent(cleanUrl);
             
-            // Ubah link tujuan tombol lalu eksekusi pengalihan halaman secara natural
-            const linkElement = document.getElementById('btnAction');
-            linkElement.href = finalDestination;
-            linkElement.target = "_blank";
+            // Alihkan halaman secara instan di tab yang sama (Bypass Pop-up Blocker HP)
+            window.location.href = finalDestination;
         }
     </script>
 </body>
