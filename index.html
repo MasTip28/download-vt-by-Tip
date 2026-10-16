@@ -190,7 +190,7 @@
             <button id="btnAction" onclick="processDownload()">Mulai Unduh</button>
         </div>
 
-        <!-- Box Hasil Potongan API -->
+        <!-- Box Hasil -->
         <div class="result-box" id="resultBox">
             <div class="video-info">
                 <img id="videoThumb" src="" alt="Thumbnail">
@@ -225,25 +225,29 @@
             resultBox.style.display = "none";
 
             try {
-                const apiUrl = `https://tikwm.com{encodeURIComponent(inputUrl)}`;
+                // Menggunakan API publik alternatif dengan penanganan CORS yang lebih baik
+                const apiUrl = `https://eu.org{encodeURIComponent(inputUrl)}`;
                 const response = await fetch(apiUrl);
+                
+                if (!response.ok) throw new Error('Network response error');
+                
                 const resData = await response.json();
 
-                if (resData.code === 0 && resData.data) {
-                    const data = resData.data;
-                    cachedDownloadUrl = data.play; 
+                // Validasi data dari API Tiklydown
+                if (resData && resData.video && resData.video.noWatermark) {
+                    cachedDownloadUrl = resData.video.noWatermark; 
 
-                    document.getElementById('videoThumb').src = data.cover;
-                    document.getElementById('videoTitle').innerText = data.title || "Video TikTok";
-                    document.getElementById('videoAuthor').innerText = `@${data.author.unique_id || "user"}`;
+                    document.getElementById('videoThumb').src = resData.video.cover || '';
+                    document.getElementById('videoTitle').innerText = resData.title || "Video TikTok";
+                    document.getElementById('videoAuthor').innerText = resData.author && resData.author.uniqueId ? `@${resData.author.uniqueId}` : "@user";
                     
                     resultBox.style.display = 'block';
                 } else {
-                    alert('Gagal mengambil data video. Pastikan link video valid dan publik!');
+                    alert('Gagal memproses video ini. Pastikan akun tidak privat dan link benar!');
                 }
             } catch (error) {
                 console.error(error);
-                alert('Terjadi kesalahan koneksi server API. Silakan coba lagi nanti.');
+                alert('Server sedang padat. Silakan coba klik tombol sekali lagi.');
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Mulai Unduh";
@@ -254,7 +258,7 @@
             if (cachedDownloadUrl) {
                 window.open(cachedDownloadUrl, '_blank');
             } else {
-                alert('Tautan unduhan tidak ditemukan, silakan muat ulang halaman.');
+                alert('Tautan unduhan hilang, silakan muat ulang halaman.');
             }
         }
     </script>
