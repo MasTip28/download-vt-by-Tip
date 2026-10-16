@@ -115,62 +115,6 @@
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
         }
 
-        button:disabled {
-            background: #4a5568;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Tampilan Kotak Hasil Mewah */
-        .result-box {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-        }
-
-        .video-card {
-            background: rgba(255, 255, 255, 0.04);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .video-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-
-        .video-author {
-            font-size: 0.85rem;
-            color: #00f2fe;
-            margin-bottom: 15px;
-        }
-
-        .download-btn {
-            background: linear-gradient(45deg, #00b4d8, #0077b6);
-            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
-            display: block;
-            width: 100%;
-            text-decoration: none;
-            text-align: center;
-            border-radius: 14px;
-            padding: 16px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .download-btn:hover {
-            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
-            transform: translateY(-2px);
-        }
-
         footer {
             margin-top: 2rem;
             font-size: 0.8rem;
@@ -186,16 +130,7 @@
         
         <div class="input-group">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
-            <button id="btnAction" onclick="prosesUnduhVideo()">Mulai Unduh</button>
-        </div>
-
-        <!-- Tampilan Hasil Internal Mandiri -->
-        <div class="result-box" id="resultBox">
-            <div class="video-card">
-                <p class="video-title" id="resTitle">Memproses Video...</p>
-                <p class="video-author" id="resAuthor">@user</p>
-                <a href="#" id="finalDownloadLink" class="download-btn" target="_blank">Simpan Video Tanpa Watermark</a>
-            </div>
+            <button id="btnAction" onclick="eksekusiUnduh()">Mulai Unduh</button>
         </div>
 
         <footer>
@@ -204,53 +139,19 @@
     </div>
 
     <script>
-        async function prosesUnduhVideo() {
-            const inputField = document.getElementById('tiktokUrl');
-            const actionBtn = document.getElementById('btnAction');
-            const resultArea = document.getElementById('resultBox');
-            let urlTarget = inputField.value.trim();
+        function eksekusiUnduh() {
+            const tautanInput = document.getElementById('tiktokUrl').value.trim();
 
-            if (!urlTarget) {
+            if (!tautanInput) {
                 alert('Tolong masukkan link TikTok terlebih dahulu!');
                 return;
             }
 
-            actionBtn.disabled = true;
-            actionBtn.innerText = "Mengambil Video...";
-            resultArea.style.display = "none";
-
-            // Bersihkan parameter link yang tidak penting
-            if (urlTarget.includes('?')) {
-                urlTarget = urlTarget.split('?')[0];
-            }
-
-            try {
-                // Menggunakan API pihak ketiga terkuat dan stabil khusus video TikTok
-                const response = await fetch(`https://tikwm.com{encodeURIComponent(urlTarget)}`);
-                const result = await response.json();
-
-                if (result && result.data) {
-                    const videoData = result.data;
-
-                    // Masukkan data hasil ke elemen HTML internal web Anda
-                    document.getElementById('resTitle').innerText = videoData.title || "Video Berhasil Ditemukan!";
-                    document.getElementById('resAuthor').innerText = `Oleh: @${videoData.author.unique_id || "Kreator"}`;
-                    
-                    // Pasang link download asli video tanpa watermark (.mp4) ke tombol
-                    const downloadAnchor = document.getElementById('finalDownloadLink');
-                    downloadAnchor.href = videoData.play;
-
-                    // Tampilkan kotak hasil yang keren
-                    resultArea.style.display = "block";
-                } else {
-                    alert('Gagal memproses link tersebut. Pastikan videonya publik (tidak di-private).');
-                }
-            } catch (err) {
-                alert('Terjadi sedikit gangguan jalur data. Silakan tekan tombol sekali lagi!');
-            } finally {
-                actionBtn.disabled = false;
-                actionBtn.innerText = "Mulai Unduh";
-            }
+            // Sistem gerbang bypass yang otomatis mendukung tautan pendek seluler (://tiktok.com)
+            const tautanBersih = tautanInput.split('?')[0];
+            
+            // Dialihkan langsung ke sistem pemroses eksternal terkuat tanpa pop-up blocker di peramban yang sama
+            window.location.href = "https://ssstik.io" + encodeURIComponent(tautanBersih);
         }
     </script>
 </body>
