@@ -84,7 +84,7 @@ downloadButton.addEventListener('click', async () => {
     const blob = await response.blob();
     if (!blob.size || !blob.type.startsWith('video/mp4')) throw new Error('File video tidak valid. Coba lagi.');
     if (version !== downloadVersion) return;
-    savedFile = new File([blob], 'download-vt-HD-tnpa-wtrpark-by-MasTip.mp4', { type: 'video/mp4' });
+    savedFile = new File([blob], 'TikSave-by-MasTip.mp4', { type: 'video/mp4' });
     const objectUrl = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = objectUrl;

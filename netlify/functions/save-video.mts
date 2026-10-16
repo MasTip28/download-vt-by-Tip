@@ -47,7 +47,7 @@ export default async (request: Request) => {
     }));
     return new Response(stream, { headers: {
       'Content-Type': 'video/mp4',
-      'Content-Disposition': 'attachment; filename="download-vt-HD-tnpa-wtrpark-by-MasTip.mp4"',
+      'Content-Disposition': 'attachment; filename="TikSave-by-MasTip.mp4"',
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff',
     } });
