@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikGlow | TikTok Downloader Aesthetic</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c20 0%, #060210 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #8a2be2, #4a00e0);
+            filter: blur(100px);
+            z-index: 0;
+            opacity: 0.5;
+        }
+        body::before { top: 10%; left: 10%; }
+        body::after { bottom: 10%; right: 10%; }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 2.5rem;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #ff007f, #7928ca, #b800ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        p.subtitle {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #7928ca;
+            box-shadow: 0 0 15px rgba(121, 40, 202, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #7928ca, #ff007f);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
+        }
+
+        button:disabled {
+            background: #4a5568;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Bagian Hasil & Pratinjau Video */
+        .result-box {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .video-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .video-info img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .video-info div h4 {
+            font-size: 0.95rem;
+            color: #fff;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-info div p {
+            font-size: 0.85rem;
+            color: #a0aec0;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00b4d8, #0077b6);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
+        }
+
+        footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>TikGlow</h1>
+        <p class="subtitle">Download video TikTok tanpa watermark dengan kualitas HD</p>
+        
+        <div class="input-group">
+            <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
+            <button id="btnAction" onclick="processDownload()">Mulai Unduh</button>
+        </div>
+
+        <!-- Box Hasil -->
+        <div class="result-box" id="resultBox">
+            <div class="video-info">
+                <img id="videoThumb" src="" alt="Thumbnail">
+                <div>
+                    <h4 id="videoTitle">Judul Video</h4>
+                    <p id="videoAuthor">@pembuat</p>
+                </div>
+            </div>
+            <button class="download-btn" onclick="triggerDownload()">Unduh Tanpa Watermark (.MP4)</button>
+        </div>
+
+        <footer>
+            &copy; 2026 TikGlow. Dibuat dengan penuh gaya.
+        </footer>
+    </div>
+
+    <script>
+        let cachedDownloadUrl = "";
+
+        async function processDownload() {
+            const inputUrl = document.getElementById('tiktokUrl').value.trim();
+            const btn = document.getElementById('btnAction');
+            const resultBox = document.getElementById('resultBox');
+
+            if (!inputUrl) {
+                alert('Tolong masukkan link TikTok terlebih dahulu!');
+                return;
+            }
+
+            // Ganti teks tombol menjadi loading
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+            resultBox.style.display = "none";
+
+            try {
+                // Menggunakan API publik gratis untuk fetch data TikTok
+                const apiUrl = `https://tikwm.com{encodeURIComponent(inputUrl)}`;
+                const response = await fetch(apiUrl);
+                const resData = await response.json();
+
+                if (resData.code === 0 && resData.data) {
+                    const data = resData.data;
+                    
+                    // Simpan URL video tanpa watermark ke variabel global
+                    cachedDownloadUrl = data.play; 
+
+                    // Tampilkan info video ke antarmuka pengguna (UI)
+                    document.getElementById('videoThumb').src = data.cover;
+                    document.getElementById('videoTitle').innerText = data.title || "Video TikTok";
+                    document.getElementById('videoAuthor').innerText = `@${data.author.unique_id || "user"}`;
+                    
+                    // Munculkan kotak hasil dengan efek transisi
+                    resultBox.style.display = 'block';
+                } else {
+                    alert('Gagal mengambil data video. Pastikan link video valid dan publik!');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Terjadi kesalahan koneksi server API. Silakan coba lagi nanti.');
+            } finally {
+                // Kembalikan tombol ke kondisi semula
+                btn.disabled = false;
+                btn.innerText = "Mulai Unduh";
+            }
+        }
+
+        function triggerDownload() {
+            if (cachedDownloadUrl) {
+                // Buka tab baru untuk mengunduh video asli tanpa watermark secara langsung
+                window.open(cachedDownloadUrl, '_blank');
+            } else {
+                alert('Tautan unduhan tidak ditemukan, silakan muat ulang halaman.');
+            }
+        }
+    </script>
+</body>
+</html>
