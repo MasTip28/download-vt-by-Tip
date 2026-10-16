@@ -147,13 +147,13 @@
                 return;
             }
 
-            // Sistem bypass otomatis untuk langsung mendownload tanpa terhalang CORS browser
-            // Menggunakan gerbang eksternal savetik yang aman dan instan
-            const downloadGateway = `https://savetik.co`;
-            
-            // Mengalihkan fokus tab baru langsung ke proses unduhan video bersih
+            // Memotong query string tidak penting di belakang link tiktok agar bersih
             const cleanUrl = inputUrl.split('?')[0];
-            window.open(`https://ssstik.io{encodeURIComponent(cleanUrl)}`, '_blank');
+            
+            // Pengalihan ke gerbang eksternal yang aman dan dijamin langsung memproses video asli
+            const finalLink = "https://ssstik.io" + encodeURIComponent(cleanUrl);
+            
+            window.open(finalLink, '_blank');
         }
     </script>
 </body>
