@@ -72,7 +72,6 @@
             margin-bottom: 2rem;
         }
 
-        /* Form Pengirim Data Murni */
         .input-group {
             display: flex;
             flex-direction: column;
@@ -97,7 +96,7 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        button.btn-submit {
+        .btn-submit {
             width: 100%;
             padding: 16px;
             background: linear-gradient(45deg, #7928ca, #ff007f);
@@ -111,9 +110,64 @@
             box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
         }
 
-        button.btn-submit:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
+        }
+
+        .btn-submit:disabled {
+            background: #4a5568;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Kotak Hasil Unduhan Internal */
+        .result-box {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .video-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .video-author {
+            font-size: 0.85rem;
+            color: #00f2fe;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00b4d8, #0077b6);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+            display: block;
+            width: 100%;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
+            transform: translateY(-2px);
         }
 
         footer {
@@ -129,13 +183,19 @@
         <h1>download by Tip</h1>
         <p class="subtitle">Download video TikTok tanpa watermark dengan cepat dan mudah</p>
         
-        <!-- Form Menggunakan Metode GET Langsung Ke Engine Server Stabil Cadangan -->
-        <form action="https://ssstik.io" method="GET" class="input-group" onsubmit="bersihkanTautan(this)">
-            <input type="text" id="inputTautan" placeholder="Tempel tautan video TikTok di sini..." required>
-            <!-- Input tersembunyi untuk mengirimkan string tautan bersih ke pemroses -->
-            <input type="hidden" name="url" id="tautanKirim">
-            <button type="submit" class="btn-submit">Mulai Unduh</button>
+        <form class="input-group" onsubmit="ambilVideoTiktok(event)">
+            <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
+            <button type="submit" id="btnAction" class="btn-submit">Mulai Unduh</button>
         </form>
+
+        <!-- Hasil Tampilan Tetap Di Sini, Nggak Lempar Ke Web Lain -->
+        <div class="result-box" id="resultBox">
+            <div class="video-card">
+                <p class="video-title" id="resTitle">Memproses Video...</p>
+                <p class="video-author" id="resAuthor">@user</p>
+                <a href="#" id="finalDownloadLink" class="download-btn" target="_blank">Download Tanpa Watermark</a>
+            </div>
+        </div>
 
         <footer>
             &copy; 2026 download by Tip. Dibuat dengan penuh gaya.
@@ -143,11 +203,48 @@
     </div>
 
     <script>
-        function bersihkanTautan(form) {
-            const rawUrl = document.getElementById('inputTautan').value.trim();
-            // Otomatis memotong kode pelacak ekor link agar dibaca dengan mulus oleh server mesin
-            const filterUrl = rawUrl.split('?')[0];
-            document.getElementById('tautanKirim').value = filterUrl;
+        async function ambilVideoTiktok(event) {
+            event.preventDefault();
+
+            const inputField = document.getElementById('tiktokUrl');
+            const actionBtn = document.getElementById('btnAction');
+            const resultArea = document.getElementById('resultBox');
+            let urlTarget = inputField.value.trim();
+
+            if (!urlTarget) return;
+
+            actionBtn.disabled = true;
+            actionBtn.innerText = "Mengekstrak Video...";
+            resultArea.style.display = "none";
+
+            try {
+                // Menggunakan API khusus dengan reverse-proxy tangguh untuk menghindari pemblokiran browser HP
+                const res = await fetch("https://allorigins.win" + encodeURIComponent("https://tikwm.com" + urlTarget));
+                if (!res.ok) throw new Error();
+                
+                const wrapperData = await res.json();
+                const cleanJson = JSON.parse(wrapperData.contents);
+
+                if (cleanJson && cleanJson.data && cleanJson.data.play) {
+                    // Update teks nama & pembuat video di dalam website-mu
+                    document.getElementById('resTitle').innerText = cleanJson.data.title || "Video TikTok Sukses Diproses!";
+                    document.getElementById('resAuthor').innerText = `@${cleanJson.data.author.unique_id || "kreator"}`;
+                    
+                    // Masukkan link file video mentah (.mp4) ke dalam tombol internal
+                    const downloadAnchor = document.getElementById('finalDownloadLink');
+                    downloadAnchor.href = cleanJson.data.play;
+
+                    // Munculkan secara estetik di bawah form tanpa pindah website
+                    resultArea.style.display = "block";
+                } else {
+                    alert("Gagal memproses tautan video. Coba pastikan video tidak di-private!");
+                }
+            } catch (err) {
+                alert("Jalur data sibuk, silakan klik tombol 'Mulai Unduh' sekali lagi untuk memuat ulang!");
+            } finally {
+                actionBtn.disabled = false;
+                actionBtn.innerText = "Mulai Unduh";
+            }
         }
     </script>
 </body>
