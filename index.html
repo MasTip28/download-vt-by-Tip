@@ -115,6 +115,65 @@
             box-shadow: 0 6px 20px rgba(255, 0, 127, 0.5);
         }
 
+        button:disabled {
+            background: #4a5568;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Bagian Hasil Unduhan Internal */
+        .result-box {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .video-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-author {
+            font-size: 0.85rem;
+            color: #a0aec0;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00b4d8, #0077b6);
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+            display: inline-block;
+            width: 100%;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 14px;
+            padding: 16px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 180, 216, 0.5);
+            transform: translateY(-2px);
+        }
+
         footer {
             margin-top: 2rem;
             font-size: 0.8rem;
@@ -130,7 +189,16 @@
         
         <div class="input-group">
             <input type="text" id="tiktokUrl" placeholder="Tempel tautan video TikTok di sini..." required>
-            <button id="btnAction" onclick="processDownload()">Langsung Unduh</button>
+            <button id="btnAction" onclick="startDownload()">Mulai Unduh</button>
+        </div>
+
+        <!-- Tampilan Hasil yang akan muncul di bawah tombol asli -->
+        <div class="result-box" id="resultBox">
+            <div class="video-card">
+                <p class="video-title" id="resTitle">Memuat Judul...</p>
+                <p class="video-author" id="resAuthor">@user</p>
+            </div>
+            <a href="#" id="finalDownloadLink" class="download-btn" download="tiktok-video.mp4">Simpan Video Ke Galeri</a>
         </div>
 
         <footer>
@@ -139,22 +207,57 @@
     </div>
 
     <script>
-        function processDownload() {
-            const inputUrl = document.getElementById('tiktokUrl').value.trim();
+        async function startDownload() {
+            const inputField = document.getElementById('tiktokUrl');
+            const actionBtn = document.getElementById('btnAction');
+            const resultArea = document.getElementById('resultBox');
+            const urlTarget = inputField.value.trim();
 
-            if (!inputUrl) {
+            if (!urlTarget) {
                 alert('Tolong masukkan link TikTok terlebih dahulu!');
                 return;
             }
 
-            // Bersihkan parameter tambahan dari tautan TikTok
-            const cleanUrl = inputUrl.split('?')[0];
-            
-            // Format tujuan langsung menggunakan gerbang layanan ekstraksi video gratis
-            const finalDestination = "https://ssstik.io" + encodeURIComponent(cleanUrl);
-            
-            // Alihkan halaman secara instan di tab yang sama (Bypass Pop-up Blocker HP)
-            window.location.href = finalDestination;
+            // Kunci tombol saat sedang memproses agar tidak ditekan berkali-kali
+            actionBtn.disabled = true;
+            actionBtn.innerText = "Sedang Memproses...";
+            resultArea.style.display = "none";
+
+            try {
+                // MENGGUNAKAN GLOBAL BYPASS PROXY: Menjamin bebas eror CORS lintas domain di semua browser HP
+                const cleanUrl = urlTarget.split('?')[0];
+                const proxyUrl = "https://allorigins.win" + encodeURIComponent("https://tikwm.com" + cleanUrl);
+                
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error();
+                
+                const rawData = await response.json();
+                const tikData = JSON.parse(rawData.contents);
+
+                if (tikData && tikData.data) {
+                    const videoInfo = tikData.data;
+
+                    // Mengisi info video ke dalam website download by Tip Anda
+                    document.getElementById('resTitle').innerText = videoInfo.title || "Video TikTok Tanpa Watermark";
+                    document.getElementById('resAuthor').innerText = `@${videoInfo.author.unique_id || "tiktok_user"}`;
+                    
+                    // Memasukkan link download asli video bersih ke tombol download internal
+                    const downloadAnchor = document.getElementById('finalDownloadLink');
+                    downloadAnchor.href = videoInfo.play;
+                    
+                    // Tampilkan kotak unduhan internal Anda
+                    resultArea.style.display = "block";
+                } else {
+                    alert('Gagal mengekstrak video. Pastikan video tidak diprivat dan link benar.');
+                }
+
+            } catch (err) {
+                alert('Terjadi kendala jaringan server. Silakan klik tombol sekali lagi untuk memuat ulang.');
+            } finally {
+                // Kembalikan tombol ke keadaan aktif semula
+                actionBtn.disabled = false;
+                actionBtn.innerText = "Mulai Unduh";
+            }
         }
     </script>
 </body>
